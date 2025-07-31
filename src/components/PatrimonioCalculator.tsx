@@ -184,7 +184,7 @@ export const PatrimonioCalculator = () => {
                     <span className="font-medium">{scaglione.descrizione}</span>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span>Base: {formatCurrency(scaglione.baseImponibile)}</span>
+                    <span>Fascia: {formatCurrency(scaglione.soglia)} - {scaglione.sogliaFine === Infinity ? '∞' : formatCurrency(scaglione.sogliaFine)}</span>
                     <span>Percentuale: {scaglione.percentuale}%</span>
                   </div>
                 </div>

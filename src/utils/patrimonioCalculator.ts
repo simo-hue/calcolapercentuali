@@ -8,42 +8,59 @@ export class PatrimonioCalculator {
   }
 
   /**
-   * Trova lo scaglione appropriato per il patrimonio dato
+   * Calcola l'importo per ogni scaglione in modo incrementale
    */
-  private trovaScaglione(patrimonio: number): number {
-    for (let i = this.scaglioni.length - 1; i >= 0; i--) {
-      if (patrimonio >= this.scaglioni[i].soglia) {
-        return i;
+  private calcolaScaglioni(patrimonio: number): {scaglione: number, baseImponibile: number, percentuale: number, importo: number}[] {
+    const dettagli: {scaglione: number, baseImponibile: number, percentuale: number, importo: number}[] = [];
+    
+    for (let i = 0; i < this.scaglioni.length; i++) {
+      const scaglione = this.scaglioni[i];
+      
+      // Se il patrimonio è minore della soglia minima, non applico questo scaglione
+      if (patrimonio < scaglione.soglia) {
+        break;
+      }
+      
+      // Calcolo la base imponibile per questo scaglione
+      const baseMinima = scaglione.soglia;
+      const baseMassima = Math.min(patrimonio, scaglione.sogliaFine);
+      const baseImponibile = baseMassima - baseMinima + 1;
+      
+      // Se la base imponibile è positiva, calcolo l'importo
+      if (baseImponibile > 0) {
+        const importo = Math.round((baseImponibile * scaglione.percentuale) / 100);
+        dettagli.push({
+          scaglione: i,
+          baseImponibile,
+          percentuale: scaglione.percentuale,
+          importo
+        });
+      }
+      
+      // Se ho raggiunto il massimo per questo scaglione, continuo
+      if (patrimonio <= scaglione.sogliaFine) {
+        break;
       }
     }
-    return 0;
+    
+    return dettagli;
   }
 
   /**
-   * Calcola l'importo finale basato sul patrimonio e sui scaglioni
+   * Calcola l'importo finale basato sul patrimonio e sui scaglioni (incrementale)
    */
   calcolaImporto(patrimonio: number): RisultatoCalcolo {
     if (patrimonio < 0) {
       throw new Error('Il patrimonio non può essere negativo');
     }
 
-    const indiceScaglione = this.trovaScaglione(patrimonio);
-    const scaglione = this.scaglioni[indiceScaglione];
-    
-    const rimanente = patrimonio - scaglione.soglia;
-    const importoPercentuale = Math.round((rimanente * scaglione.percentuale) / 100);
-    const totaleCalcolato = scaglione.baseImponibile + importoPercentuale;
+    const dettaglioCalculi = this.calcolaScaglioni(patrimonio);
+    const totaleCalcolato = dettaglioCalculi.reduce((totale, dettaglio) => totale + dettaglio.importo, 0);
 
     return {
       patrimonio,
-      scaglioneApplicato: indiceScaglione,
       totaleCalcolato,
-      dettaglioCalcolo: {
-        baseImponibile: scaglione.baseImponibile,
-        rimanente: Math.max(0, rimanente),
-        percentualeApplicata: scaglione.percentuale,
-        importoPercentuale
-      }
+      dettaglioCalculi
     };
   }
 

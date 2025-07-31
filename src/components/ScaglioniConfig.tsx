@@ -44,7 +44,7 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
     const newScaglione: Scaglione = {
       id: newId,
       soglia: newSoglia,
-      baseImponibile: 0,
+      sogliaFine: newSoglia + 10000,
       percentuale: 0,
       descrizione: `Nuovo scaglione ${newId}`
     };
@@ -81,7 +81,7 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
     for (let i = 0; i < scaglioniLocali.length; i++) {
       const scaglione = scaglioniLocali[i];
       
-      if (scaglione.soglia < 0 || scaglione.baseImponibile < 0 || scaglione.percentuale < 0) {
+      if (scaglione.soglia < 0 || scaglione.percentuale < 0) {
         toast({
           title: "Errore di validazione",
           description: `Lo scaglione ${i} contiene valori negativi`,
@@ -130,8 +130,8 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
                   <p className="font-medium text-accent">Istruzioni:</p>
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• <strong>Soglia:</strong> Valore minimo di patrimonio per applicare questo scaglione</li>
-                    <li>• <strong>Base Imponibile:</strong> Importo fisso applicato a questo scaglione</li>
-                    <li>• <strong>Percentuale:</strong> Percentuale applicata alla parte eccedente la soglia</li>
+                    <li>• <strong>Soglia Fine:</strong> Valore massimo per questo scaglione (lascia vuoto per illimitato)</li>
+                    <li>• <strong>Percentuale:</strong> Percentuale applicata alla fascia di questo scaglione</li>
                     <li>• <strong>Descrizione:</strong> Descrizione leggibile dello scaglione</li>
                   </ul>
                 </div>
@@ -193,15 +193,16 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor={`base-${scaglione.id}`} className="text-xs">
-                      Base Imponibile (€)
+                    <Label htmlFor={`fine-${scaglione.id}`} className="text-xs">
+                      Soglia Fine (€)
                     </Label>
                     <Input
-                      id={`base-${scaglione.id}`}
+                      id={`fine-${scaglione.id}`}
                       type="number"
-                      value={scaglione.baseImponibile}
-                      onChange={(e) => handleUpdateScaglione(index, 'baseImponibile', parseInt(e.target.value) || 0)}
+                      value={scaglione.sogliaFine === Infinity ? '' : scaglione.sogliaFine}
+                      onChange={(e) => handleUpdateScaglione(index, 'sogliaFine', e.target.value === '' ? Infinity : parseInt(e.target.value) || 0)}
                       className="text-sm"
+                      placeholder="Infinity per illimitato"
                     />
                   </div>
                   

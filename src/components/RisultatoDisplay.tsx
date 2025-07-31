@@ -11,8 +11,6 @@ interface RisultatoDisplayProps {
 }
 
 export const RisultatoDisplay = ({ risultato, scaglioni }: RisultatoDisplayProps) => {
-  const scaglioneApplicato = scaglioni[risultato.scaglioneApplicato];
-
   return (
     <Card className="shadow-[var(--shadow-financial)] border-primary/20">
       <CardHeader className="pb-4">
@@ -23,11 +21,11 @@ export const RisultatoDisplay = ({ risultato, scaglioni }: RisultatoDisplayProps
               Risultato del Calcolo
             </CardTitle>
             <CardDescription>
-              Dettaglio completo del calcolo patrimoniale
+              Calcolo incrementale su scaglioni patrimoniali
             </CardDescription>
           </div>
           <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
-            Scaglione {risultato.scaglioneApplicato}
+            {risultato.dettaglioCalculi.length} Scaglioni Applicati
           </Badge>
         </div>
       </CardHeader>
@@ -47,66 +45,45 @@ export const RisultatoDisplay = ({ risultato, scaglioni }: RisultatoDisplayProps
 
         <Separator />
 
-        {/* Dettaglio Scaglione Applicato */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="bg-muted/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Info className="h-4 w-4" />
-                Scaglione Applicato
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Descrizione:</span>
-                  <span className="font-medium">{scaglioneApplicato.descrizione}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Soglia minima:</span>
-                  <span className="font-medium">{formatCurrency(scaglioneApplicato.soglia)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Percentuale:</span>
-                  <span className="font-medium">{scaglioneApplicato.percentuale}%</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-muted/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Calculator className="h-4 w-4" />
-                Dettaglio Calcolo
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Base imponibile:</span>
-                  <span className="font-medium">{formatCurrency(risultato.dettaglioCalcolo.baseImponibile)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Rimanente:</span>
-                  <span className="font-medium">{formatCurrency(risultato.dettaglioCalcolo.rimanente)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Importo percentuale:</span>
-                  <span className="font-medium">{formatCurrency(risultato.dettaglioCalcolo.importoPercentuale)}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Dettaglio Scaglioni Applicati */}
+        <div className="space-y-3">
+          <h4 className="font-semibold flex items-center gap-2">
+            <Calculator className="h-4 w-4" />
+            Dettaglio del Calcolo Incrementale
+          </h4>
+          
+          <div className="space-y-3">
+            {risultato.dettaglioCalculi.map((dettaglio, index) => (
+              <Card key={index} className="bg-muted/50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline" className="bg-background">
+                      {scaglioni[dettaglio.scaglione]?.descrizione}
+                    </Badge>
+                    <span className="font-bold text-primary">
+                      {formatCurrency(dettaglio.importo)}
+                    </span>
+                  </div>
+                  
+                  <div className="text-sm text-muted-foreground">
+                    Base imponibile: {formatCurrency(dettaglio.baseImponibile)} × {dettaglio.percentuale}%
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
         {/* Formula di Calcolo */}
         <div className="p-4 bg-muted rounded-lg">
-          <h4 className="text-sm font-medium mb-2 text-muted-foreground">Formula applicata:</h4>
+          <h4 className="text-sm font-medium mb-2 text-muted-foreground">Formula di calcolo incrementale:</h4>
           <div className="font-mono text-sm bg-background p-3 rounded border">
-            <span className="text-accent">Base Imponibile</span>
-            <span className="text-muted-foreground"> + </span>
-            <span className="text-accent">({formatNumber(risultato.dettaglioCalcolo.rimanente)} × {risultato.dettaglioCalcolo.percentualeApplicata}%)</span>
+            {risultato.dettaglioCalculi.map((dettaglio, index) => (
+              <span key={index}>
+                {index > 0 && <span className="text-muted-foreground"> + </span>}
+                <span className="text-accent">{formatCurrency(dettaglio.importo)}</span>
+              </span>
+            ))}
             <span className="text-muted-foreground"> = </span>
             <span className="text-primary font-bold">{formatCurrency(risultato.totaleCalcolato)}</span>
           </div>
@@ -118,8 +95,9 @@ export const RisultatoDisplay = ({ risultato, scaglioni }: RisultatoDisplayProps
           <div className="text-sm">
             <p className="text-accent font-medium mb-1">Come viene calcolato l'importo:</p>
             <p className="text-muted-foreground text-xs">
-              L'importo totale è dato dalla somma della base imponibile dello scaglione 
-              più la percentuale applicata sulla parte eccedente la soglia minima dello scaglione.
+              Il calcolo è incrementale: ogni scaglione contribuisce con la sua percentuale 
+              solo per la parte di patrimonio che rientra in quella fascia. Gli importi di tutti 
+              gli scaglioni applicabili vengono poi sommati per ottenere il totale.
             </p>
           </div>
         </div>
