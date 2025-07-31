@@ -24,7 +24,7 @@ export class PatrimonioCalculator {
       // Calcolo la base imponibile per questo scaglione
       const baseMinima = scaglione.soglia;
       const baseMassima = Math.min(patrimonio, scaglione.sogliaFine);
-      const baseImponibile = baseMassima - baseMinima + 1;
+      const baseImponibile = baseMassima - baseMinima;
       
       // Se la base imponibile è positiva, calcolo l'importo
       if (baseImponibile > 0) {
