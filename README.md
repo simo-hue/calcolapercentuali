@@ -198,36 +198,3 @@ npm i
 # Avvia il server di sviluppo
 npm run dev
 ```
-
-### Deployment su Lovable
-
-1. Apri [Lovable](https://lovable.dev/projects/201d51e4-851e-4610-b4f6-d87a9818dcbe)
-2. Clicca su Share -> Publish
-3. Il deployment avviene automaticamente
-
-### Dominio Personalizzato
-
-Per connettere un dominio personalizzato:
-1. Vai su Project > Settings > Domains
-2. Clicca su Connect Domain
-3. Segui la guida: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
-
-## 📄 Project Info
-
-**URL Progetto**: https://lovable.dev/projects/201d51e4-851e-4610-b4f6-d87a9818dcbe
-
-### Modalità di Editing
-
-- **Lovable**: Edita direttamente nell'interfaccia web
-- **IDE Locale**: Clona e lavora con il tuo editor preferito
-- **GitHub**: Modifica i file direttamente su GitHub
-- **Codespaces**: Usa l'ambiente di sviluppo integrato di GitHub
-
----
-
-### 💡 Note per Sviluppatori
-
-- **Estensibilità**: Architettura modulare per future espansioni
-- **Manutenibilità**: Codice ben organizzato e documentato
-- **Performance**: Ottimizzazioni per caricamento e rendering rapidi
-- **Accessibilità**: Conforme alle linee guida WCAG per l'accessibilità web
