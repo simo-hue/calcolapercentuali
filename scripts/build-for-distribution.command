@@ -11,6 +11,19 @@ if ! command -v npm &> /dev/null; then
     exit 1
 fi
 
+# Installa le dipendenze
+echo "Installazione delle dipendenze..."
+npm install
+
+if [ $? -ne 0 ]; then
+    echo "ERRORE durante l'installazione delle dipendenze."
+    read -p "Premi INVIO per uscire..."
+    exit 1
+fi
+
+echo ""
+echo "Creazione della build..."
+
 # Esegue la build
 npm run build
 
