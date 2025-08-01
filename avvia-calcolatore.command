@@ -1,0 +1,11 @@
+#!/bin/bash
+cd "$(dirname "$0")"
+echo "Avvio del Calcolatore Patrimoniale..."
+echo ""
+echo "L'applicazione si aprirà nel tuo browser predefinito."
+echo "Per chiudere l'applicazione, chiudi semplicemente il browser."
+echo ""
+open "dist/index.html"
+echo ""
+echo "Applicazione avviata! Controlla il browser."
+read -p "Premi INVIO per continuare..."
