@@ -53,12 +53,11 @@ Complete redesign of the mobile experience to match modern professional financia
     - Animated result entrance.
 - **Improved Configuration UI**: The Scaglioni configuration modal now uses a more compact, mobile-friendly list layout for editing tiers.
 
-### Desktop Adaptation (Unified Card)
-On larger screens (>= md), the application transforms into a "Center Stage" Dashboard:
--   **Single Central Card**: A focused, elegant card centered on the screen.
--   **Top-Heavy Input**: The input field is placed at the very top of the card ("Cifra in cima a tutto"), prioritizing data entry above all else.
--   **Integrated Actions**: Action buttons are placed directly below the input for a natural flow.
--   **Context Below**: The Results or Configuration list sits at the bottom, providing context without distracting from the main input.
+### Desktop Adaptation (Split View)
+On larger screens (>= md), the application transforms into a horizontal split view:
+-   **Split Layout**: The card expands horizontally (`max-w-4xl`), placing the **Input** on the left and the **Results/Context** on the right.
+-   **Top-Heavy Input**: The input remains the primary focus on the left side.
+-   **Context Side-by-Side**: The Results or Configuration list sits on the right, allowing for simultaneous viewing of input and output without scrolling.
 -   **Visuals**: Uses backdrop blur and soft borders for a premium desktop feel.
 
 ## 5. GitHub Pages Deployment
@@ -68,3 +67,7 @@ Configured the application for deployment to GitHub Pages using GitHub Actions.
 - **Base Path**: Updated `vite.config.ts` to use `/calcolapercentuali/` as the base path.
 - **Homepage**: Added `homepage` field to `package.json`.
 - **Workflow**: Created `.github/workflows/deploy.yml` to automatically build and deploy to GitHub Pages on push to `main`.
+
+### Troubleshooting
+-   **404 on Refresh**: Added a step in the deployment workflow to copy `index.html` to `404.html` to handle client-side routing.
+-   **Basename**: Configured `BrowserRouter` with `basename={import.meta.env.BASE_URL}` to respect the `/calcolapercentuali/` path.

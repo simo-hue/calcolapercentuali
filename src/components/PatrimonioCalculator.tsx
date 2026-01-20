@@ -107,10 +107,10 @@ export const PatrimonioCalculator = () => {
         <ModeToggle />
       </div>
 
-      <div className="w-full max-w-lg bg-background md:bg-card md:rounded-3xl md:shadow-2xl overflow-hidden flex flex-col transition-all duration-500 min-h-screen md:min-h-[auto]">
+      <div className="w-full max-w-lg md:max-w-4xl bg-background md:bg-card md:rounded-3xl md:shadow-2xl overflow-hidden flex flex-col md:flex-row transition-all duration-500 min-h-screen md:min-h-[600px]">
 
         {/* TOP SECTION: Input (Cifra in cima a tutto) */}
-        <div className="pt-16 pb-8 px-8 text-center bg-background md:bg-card relative z-10 text-foreground">
+        <div className="pt-16 pb-8 px-8 text-center bg-background md:bg-card relative z-10 text-foreground md:w-1/2 md:flex md:flex-col md:justify-center md:pt-8">
           <div className="mb-2 flex items-center justify-center gap-2">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted px-2 py-1 rounded">
               Patrimonio
@@ -167,7 +167,7 @@ export const PatrimonioCalculator = () => {
         </div>
 
         {/* BOTTOM SECTION: Context (Results or List) */}
-        <div className="flex-1 bg-muted/30 border-t border-border/50 p-6 md:p-8">
+        <div className="flex-1 bg-muted/30 border-t md:border-t-0 md:border-l border-border/50 p-6 md:p-8 md:w-1/2 md:flex md:flex-col md:justify-center">
           {/* Result Card (Animated) */}
           {risultato ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
