@@ -1,21 +1,27 @@
 # TO SIMO DO
 
-## GitHub Pages Deployment
+## 1. Configurazione Segreti (URGENTE)
+L'errore `Uncaught Error: Missing Supabase Environment Variables` avviene perché GitHub non conosce le chiavi di Supabase.
+
+1.  Vai su GitHub: `Settings` > `Secrets and variables` > `Actions`.
+2.  Clicca su **New repository secret**.
+3.  Aggiungi le seguenti 3 variabili (copiale dal tuo file `.env.local` che hai sul tuo computer):
+    *   **Name**: `VITE_SUPABASE_URL`
+        *   **Value**: (copia il valore da `.env.local`)
+    *   **Name**: `VITE_SUPABASE_ANON_KEY`
+        *   **Value**: (copia il valore da `.env.local`)
+    *   **Name**: `VITE_PASSWORD_SCAGLIONI`
+        *   **Value**: `root`
+
+## 2. GitHub Pages Deployment
 1.  **Commit and Push**:
     ```bash
     git add .
-    git commit -m "feat: configure github pages deployment"
+    git commit -m "chore: add secrets to workflow"
     git push origin main
     ```
-    *Note: Ensure your remote `origin` points to `https://github.com/ServiziPerTribunali/calcolapercentuali`. If not, update it:*
-    ```bash
-    git remote set-url origin https://github.com/ServiziPerTribunali/calcolapercentuali.git
-    ```
 
-2.  **Enable GitHub Pages**:
-    -   Go to your repository on GitHub: `https://github.com/ServiziPerTribunali/calcolapercentuali`
-    -   Go to **Settings** > **Pages**.
-    -   Under **Build and deployment**, **Source**, seleziona **GitHub Actions** nel menu a tendina (come vedi nello screenshot che hai mandato).
-        -   *Non usare "Deploy from a branch", perché abbiamo creato un workflow automatico apposta.*
-    -   Wait for the action to complete (check the **Actions** tab).
-    -   Your site should be live at: `https://ServiziPerTribunali.github.io/calcolapercentuali/`
+2.  **Verifica**:
+    -   Vai nella tab **Actions** su GitHub.
+    -   Controlla che il nuovo workflow (attivato dal push) finisca con successo.
+    -   Controlla il sito.

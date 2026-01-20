@@ -72,5 +72,6 @@ Configured the application for deployment to GitHub Pages using GitHub Actions.
 - **Workflow**: Created `.github/workflows/deploy.yml` to automatically build and deploy to GitHub Pages on push to `main`.
 
 ### Troubleshooting
+-   **Missing Secrets**: The build will fail if Supabase secrets (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) are not configured in GitHub repository secrets.
 -   **404 on Refresh**: Added a step in the deployment workflow to copy `index.html` to `404.html` to handle client-side routing.
 -   **Basename**: Configured `BrowserRouter` with `basename={import.meta.env.BASE_URL}` to respect the `/calcolapercentuali/` path.
