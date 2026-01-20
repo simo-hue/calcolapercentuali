@@ -25,6 +25,8 @@ interface ScaglioniConfigProps {
 
 export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigProps) => {
   const [scaglioniLocali, setScaglioniLocali] = useState<Scaglione[]>([...scaglioni]);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [password, setPassword] = useState('');
   const { toast } = useToast();
 
   const handleUpdateScaglione = (index: number, field: keyof Scaglione, value: any) => {
@@ -40,7 +42,7 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
     const newId = Math.max(...scaglioniLocali.map(s => s.id)) + 1;
     const lastScaglione = scaglioniLocali[scaglioniLocali.length - 1];
     const newSoglia = lastScaglione ? lastScaglione.soglia + 10000 : 0;
-    
+
     const newScaglione: Scaglione = {
       id: newId,
       soglia: newSoglia,
@@ -48,7 +50,7 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
       percentuale: 0,
       descrizione: `Nuovo scaglione ${newId}`
     };
-    
+
     setScaglioniLocali([...scaglioniLocali, newScaglione]);
   };
 
@@ -61,7 +63,7 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
       });
       return;
     }
-    
+
     const newScaglioni = scaglioniLocali.filter((_, i) => i !== index);
     setScaglioniLocali(newScaglioni);
   };
@@ -69,9 +71,9 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
   const handleMoveScaglione = (index: number, direction: 'up' | 'down') => {
     const newScaglioni = [...scaglioniLocali];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    
+
     if (targetIndex < 0 || targetIndex >= newScaglioni.length) return;
-    
+
     [newScaglioni[index], newScaglioni[targetIndex]] = [newScaglioni[targetIndex], newScaglioni[index]];
     setScaglioniLocali(newScaglioni);
   };
@@ -80,7 +82,7 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
     // Validazione base
     for (let i = 0; i < scaglioniLocali.length; i++) {
       const scaglione = scaglioniLocali[i];
-      
+
       if (scaglione.soglia < 0 || scaglione.percentuale < 0) {
         toast({
           title: "Errore di validazione",
@@ -89,7 +91,7 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
         });
         return;
       }
-      
+
       if (i > 0 && scaglione.soglia <= scaglioniLocali[i - 1].soglia) {
         toast({
           title: "Errore di validazione",
@@ -100,11 +102,27 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
       }
     }
 
-    // Ordina per soglia
-    const scaglioniOrdinati = [...scaglioniLocali].sort((a, b) => a.soglia - b.soglia);
-    
-    onSave(scaglioniOrdinati);
-    onClose();
+    // Apre il dialog per la password
+    setShowPasswordDialog(true);
+  };
+
+  const handlePasswordConfirm = () => {
+    const expectedPassword = import.meta.env.VITE_PASSWORD_SCAGLIONI;
+
+    if (password === expectedPassword) {
+      // Ordina per soglia
+      const scaglioniOrdinati = [...scaglioniLocali].sort((a, b) => a.soglia - b.soglia);
+      onSave(scaglioniOrdinati);
+      setShowPasswordDialog(false);
+      onClose();
+    } else {
+      toast({
+        title: "Password non valida",
+        description: "La password inserita non è corretta.",
+        variant: "destructive"
+      });
+      setPassword('');
+    }
   };
 
   return (
@@ -140,100 +158,95 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
           </Card>
 
           {/* Lista Scaglioni */}
-          <div className="space-y-3">
+          <div className="md:grid md:grid-cols-2 gap-4 space-y-4 md:space-y-0">
             {scaglioniLocali.map((scaglione, index) => (
-              <Card key={scaglione.id} className="relative">
-                <CardHeader className="pb-3">
+              <div key={scaglione.id} className="relative group bg-accent/5 rounded-xl border border-border/50 overflow-hidden h-full">
+                <div className="p-4 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">Scaglione {index}</Badge>
-                      <CardTitle className="text-sm">ID: {scaglione.id}</CardTitle>
+                      <Badge variant="secondary" className="font-mono text-xs">#{index + 1}</Badge>
+                      <span className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Scaglione</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
+                        className="h-8 w-8 hover:bg-background"
                         onClick={() => handleMoveScaglione(index, 'up')}
                         disabled={index === 0}
                       >
-                        <ArrowUp className="h-3 w-3" />
+                        <ArrowUp className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
+                        className="h-8 w-8 hover:bg-background"
                         onClick={() => handleMoveScaglione(index, 'down')}
                         disabled={index === scaglioniLocali.length - 1}
                       >
-                        <ArrowDown className="h-3 w-3" />
+                        <ArrowDown className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={() => handleRemoveScaglione(index)}
                         disabled={scaglioniLocali.length <= 1}
-                        className="text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor={`soglia-${scaglione.id}`} className="text-xs">
-                      Soglia (€)
-                    </Label>
-                    <Input
-                      id={`soglia-${scaglione.id}`}
-                      type="number"
-                      value={scaglione.soglia}
-                      onChange={(e) => handleUpdateScaglione(index, 'soglia', parseInt(e.target.value) || 0)}
-                      className="text-sm"
-                    />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor={`soglia-${scaglione.id}`} className="text-xs text-muted-foreground">Da Patrimonio (€)</Label>
+                      <Input
+                        id={`soglia-${scaglione.id}`}
+                        type="number"
+                        inputMode="decimal"
+                        value={scaglione.soglia}
+                        onChange={(e) => handleUpdateScaglione(index, 'soglia', parseInt(e.target.value) || 0)}
+                        className="h-9 bg-background font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor={`fine-${scaglione.id}`} className="text-xs text-muted-foreground">A Patrimonio (€)</Label>
+                      <Input
+                        id={`fine-${scaglione.id}`}
+                        type="number"
+                        inputMode="decimal"
+                        value={scaglione.sogliaFine === Infinity ? '' : scaglione.sogliaFine}
+                        onChange={(e) => handleUpdateScaglione(index, 'sogliaFine', e.target.value === '' ? Infinity : parseInt(e.target.value) || 0)}
+                        className="h-9 bg-background font-mono"
+                        placeholder="∞"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor={`percentuale-${scaglione.id}`} className="text-xs text-muted-foreground">Aliquota (%)</Label>
+                      <Input
+                        id={`percentuale-${scaglione.id}`}
+                        type="number"
+                        step="0.1"
+                        inputMode="decimal"
+                        value={scaglione.percentuale}
+                        onChange={(e) => handleUpdateScaglione(index, 'percentuale', parseFloat(e.target.value) || 0)}
+                        className="h-9 bg-background font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor={`descrizione-${scaglione.id}`} className="text-xs text-muted-foreground">Etichetta</Label>
+                      <Input
+                        id={`descrizione-${scaglione.id}`}
+                        value={scaglione.descrizione}
+                        onChange={(e) => handleUpdateScaglione(index, 'descrizione', e.target.value)}
+                        className="h-9 bg-background"
+                        placeholder="Descrizione"
+                      />
+                    </div>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor={`fine-${scaglione.id}`} className="text-xs">
-                      Soglia Fine (€)
-                    </Label>
-                    <Input
-                      id={`fine-${scaglione.id}`}
-                      type="number"
-                      value={scaglione.sogliaFine === Infinity ? '' : scaglione.sogliaFine}
-                      onChange={(e) => handleUpdateScaglione(index, 'sogliaFine', e.target.value === '' ? Infinity : parseInt(e.target.value) || 0)}
-                      className="text-sm"
-                      placeholder="Infinity per illimitato"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor={`percentuale-${scaglione.id}`} className="text-xs">
-                      Percentuale (%)
-                    </Label>
-                    <Input
-                      id={`percentuale-${scaglione.id}`}
-                      type="number"
-                      step="0.1"
-                      value={scaglione.percentuale}
-                      onChange={(e) => handleUpdateScaglione(index, 'percentuale', parseFloat(e.target.value) || 0)}
-                      className="text-sm"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor={`descrizione-${scaglione.id}`} className="text-xs">
-                      Descrizione
-                    </Label>
-                    <Input
-                      id={`descrizione-${scaglione.id}`}
-                      value={scaglione.descrizione}
-                      onChange={(e) => handleUpdateScaglione(index, 'descrizione', e.target.value)}
-                      className="text-sm"
-                      placeholder="Es: 0 - 20.000€"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
 
@@ -262,6 +275,31 @@ export const ScaglioniConfig = ({ scaglioni, onSave, onClose }: ScaglioniConfigP
           </div>
         </div>
       </DialogContent>
+
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Conferma Modifiche</DialogTitle>
+            <DialogDescription>
+              Inserisci la password di amministrazione per salvare le modifiche.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handlePasswordConfirm();
+              }}
+            />
+            <Button onClick={handlePasswordConfirm} className="w-full">
+              Conferma
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };

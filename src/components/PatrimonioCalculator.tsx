@@ -1,29 +1,64 @@
 import { useState } from 'react';
-import { Calculator, Settings, Info } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Settings, Info, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { PatrimonioCalculator as CalcolatorePatrimonio } from '@/utils/patrimonioCalculator';
 import { DEFAULT_SCAGLIONI, RisultatoCalcolo, Scaglione } from '@/types/patrimonio';
-import { formatCurrency, formatNumber } from '@/utils/patrimonioCalculator';
+import { formatCurrency } from '@/utils/patrimonioCalculator';
 import { ScaglioniConfig } from './ScaglioniConfig';
 import { RisultatoDisplay } from './RisultatoDisplay';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { scaglioniService } from '@/services/scaglioniService';
+
+import { ModeToggle } from '@/components/mode-toggle';
 
 export const PatrimonioCalculator = () => {
   const [patrimonio, setPatrimonio] = useState<string>('');
   const [risultato, setRisultato] = useState<RisultatoCalcolo | null>(null);
-  const [scaglioni, setScaglioni] = useState<Scaglione[]>(DEFAULT_SCAGLIONI);
   const [showConfig, setShowConfig] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const calculator = new CalcolatorePatrimonio(scaglioni);
+  // Smart Caching Strategy:
+  // Fetch Scaglioni from DB.
+  // staleTime: Infinity -> The data is considered fresh forever unless explicitly invalidated.
+  // This minimizes network requests for a "furbo" fast experience.
+  const { data: scaglioni, isLoading } = useQuery({
+    queryKey: ['scaglioni'],
+    queryFn: scaglioniService.getScaglioni,
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24, // Keep in garbage collector for 24 hours
+    initialData: DEFAULT_SCAGLIONI, // Show defaults instantly while fetching or if error
+  });
+
+  const updateScaglioniMutation = useMutation({
+    mutationFn: scaglioniService.updateScaglioni,
+    onSuccess: () => {
+      // Invalidate cache to force refresh across the app (though we optimistic updated essentially)
+      queryClient.invalidateQueries({ queryKey: ['scaglioni'] });
+      toast({
+        title: "Salvataggio riuscito",
+        description: "La configurazione degli scaglioni è stata aggiornata nel database.",
+      });
+      setRisultato(null); // Reset result
+    },
+    onError: (error) => {
+      console.error("Failed to update:", error);
+      toast({
+        title: "Errore durante il salvataggio",
+        description: "Impossibile aggiornare il database. Riprova.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const calculator = new CalcolatorePatrimonio(scaglioni || DEFAULT_SCAGLIONI);
 
   const handleCalculate = () => {
     const patrimonioNum = parseFloat(patrimonio.replace(/[^\d.-]/g, ''));
-    
+
     if (isNaN(patrimonioNum) || patrimonioNum < 0) {
       toast({
         title: "Errore",
@@ -36,7 +71,7 @@ export const PatrimonioCalculator = () => {
     try {
       const result = calculator.calcolaImporto(patrimonioNum);
       setRisultato(result);
-      
+
       toast({
         title: "Calcolo completato",
         description: `Importo calcolato: ${formatCurrency(result.totaleCalcolato)}`,
@@ -62,141 +97,142 @@ export const PatrimonioCalculator = () => {
   };
 
   const handleScaglioniUpdate = (nuoviScaglioni: Scaglione[]) => {
-    setScaglioni(nuoviScaglioni);
-    setRisultato(null); // Reset del risultato quando cambiano i parametri
-    toast({
-      title: "Scaglioni aggiornati",
-      description: "Le modifiche sono state applicate con successo",
-    });
+    // Trigger mutation instead of local state
+    updateScaglioniMutation.mutate(nuoviScaglioni);
   };
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="container max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Calculator className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">
-              Calcolatore Patrimoniale
-            </h1>
-          </div>
-          <p className="text-muted-foreground">
-            Calcola l'importo dovuto in base agli scaglioni patrimoniali configurabili
-          </p>
-        </div>
+    <div className="min-h-screen bg-background flex flex-col items-center md:py-12 md:bg-muted/10">
+      <div className="fixed top-4 right-4 z-50 print:hidden">
+        <ModeToggle />
+      </div>
 
-        {/* Main Calculator Card */}
-        <Card className="shadow-[var(--shadow-card)]">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="h-5 w-5" />
-                  Inserimento Patrimonio
-                </CardTitle>
-                <CardDescription>
-                  Inserisci il valore del patrimonio liquido disponibile
-                </CardDescription>
-              </div>
+      <div className="w-full max-w-lg bg-background md:bg-card md:rounded-3xl md:shadow-2xl overflow-hidden flex flex-col transition-all duration-500 min-h-screen md:min-h-[auto]">
+
+        {/* TOP SECTION: Input (Cifra in cima a tutto) */}
+        <div className="pt-16 pb-8 px-8 text-center bg-background md:bg-card relative z-10 text-foreground">
+          <div className="mb-2 flex items-center justify-center gap-2">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted px-2 py-1 rounded">
+              Patrimonio
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowConfig(true)}
+              className="h-6 w-6 text-muted-foreground hover:text-primary absolute right-6 top-6"
+            >
+              <Settings className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="relative flex justify-center items-center">
+            <span className="text-4xl md:text-5xl text-muted-foreground font-light mr-2 pb-2">
+              €
+            </span>
+            <Input
+              id="patrimonio"
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]*"
+              placeholder="0"
+              value={patrimonio}
+              onChange={(e) => handlePatrimonioChange(e.target.value)}
+              className="text-6xl md:text-7xl font-bold h-24 text-center border-none shadow-none bg-transparent focus-visible:ring-0 p-0 placeholder:text-muted-foreground/10 w-full max-w-[300px] text-foreground"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCalculate();
+              }}
+            />
+          </div>
+
+          {/* Main Action - Integrated */}
+          <div className="mt-8 flex justify-center gap-3">
+            {risultato && (
               <Button
                 variant="outline"
-                size="sm"
-                onClick={() => setShowConfig(true)}
-                className="flex items-center gap-2"
+                onClick={handleReset}
+                className="h-12 px-6 rounded-full"
               >
-                <Settings className="h-4 w-4" />
-                Configura Scaglioni
+                Resetta
               </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="patrimonio" className="text-sm font-medium">
-                Patrimonio Liquido (€)
-              </Label>
-              <div className="flex gap-2">
-                <Input
-                  id="patrimonio"
-                  type="text"
-                  placeholder="Es: 75000"
-                  value={patrimonio}
-                  onChange={(e) => handlePatrimonioChange(e.target.value)}
-                  className="flex-1 text-lg"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCalculate();
-                    }
-                  }}
-                />
-                <Button 
-                  onClick={handleCalculate}
-                  disabled={!patrimonio.trim()}
-                  className="px-6"
-                >
-                  Calcola
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={handleReset}
-                  disabled={!patrimonio && !risultato}
-                >
-                  Reset
-                </Button>
-              </div>
-            </div>
+            )}
+            <Button
+              onClick={handleCalculate}
+              disabled={!patrimonio.trim() || isLoading}
+              className="h-12 px-12 text-lg font-semibold rounded-full shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+            >
+              {isLoading ? <Loader2 className="animate-spin" /> : "Calcola"}
+            </Button>
+          </div>
+        </div>
 
-            {/* Info Badge */}
-            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-              <Info className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Il calcolo viene eseguito in base agli scaglioni configurati. 
-                Usa il pulsante "Configura Scaglioni" per modificare i parametri.
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Risultato */}
-        {risultato && (
-          <RisultatoDisplay 
-            risultato={risultato} 
-            scaglioni={scaglioni}
-          />
-        )}
-
-        {/* Tabella Scaglioni Correnti */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Scaglioni Attualmente Configurati</CardTitle>
-            <CardDescription>
-              Panoramica degli scaglioni e delle percentuali applicate
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-2">
-              {scaglioni.map((scaglione, index) => (
-                <div key={scaglione.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="min-w-[2rem] justify-center">
-                      {index}
-                    </Badge>
-                    <span className="font-medium">{scaglione.descrizione}</span>
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span>Fascia: {formatCurrency(scaglione.soglia)} - {scaglione.sogliaFine === Infinity ? '∞' : formatCurrency(scaglione.sogliaFine)}</span>
-                    <span>Percentuale: {scaglione.percentuale}%</span>
+        {/* BOTTOM SECTION: Context (Results or List) */}
+        <div className="flex-1 bg-muted/30 border-t border-border/50 p-6 md:p-8">
+          {/* Result Card (Animated) */}
+          {risultato ? (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+              <div className="bg-background rounded-2xl p-6 border border-border/50 shadow-sm text-center">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-xs text-muted-foreground font-bold uppercase tracking-widest">
+                    Importo Dovuto
+                  </span>
+                  <div className="text-5xl font-black text-primary tracking-tighter">
+                    {formatCurrency(risultato.totaleCalcolato)}
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 px-2">
+                  <Info className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Dettaglio Calcolo
+                  </span>
+                </div>
+                <RisultatoDisplay
+                  risultato={risultato}
+                  scaglioni={scaglioni || DEFAULT_SCAGLIONI}
+                />
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          ) : (
+            /* Scaglioni List (Clean) */
+            <div className="space-y-4 animate-in fade-in duration-500">
+              <div className="flex items-center justify-between px-2">
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  Configurazione Attuale
+                </span>
+                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+              </div>
+
+              <div className="divide-y divide-border/50 border border-border/50 bg-background/50 backdrop-blur-sm rounded-xl overflow-hidden shadow-sm">
+                {(scaglioni || DEFAULT_SCAGLIONI).map((scaglione) => (
+                  <div key={scaglione.id} className="flex justify-between items-center p-4 hover:bg-muted/50 transition-colors">
+                    <div className="text-sm text-muted-foreground">
+                      <span className="font-medium text-foreground">{formatCurrency(scaglione.soglia)}</span>
+                      <span className="mx-2 text-muted-foreground/50">→</span>
+                      <span>{scaglione.sogliaFine === Infinity ? '∞' : formatCurrency(scaglione.sogliaFine)}</span>
+                    </div>
+                    <Badge variant="secondary" className="font-bold text-sm">
+                      {scaglione.percentuale}%
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center pt-4">
+                <p className="text-xs text-muted-foreground">
+                  Modifica gli scaglioni cliccando l'icona <Settings className="w-3 h-3 inline align-baseline" /> in alto a destra.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Modal Configurazione */}
         {showConfig && (
           <ScaglioniConfig
-            scaglioni={scaglioni}
+            scaglioni={scaglioni || DEFAULT_SCAGLIONI}
             onSave={handleScaglioniUpdate}
             onClose={() => setShowConfig(false)}
           />
