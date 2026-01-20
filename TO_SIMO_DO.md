@@ -24,4 +24,7 @@ L'errore `Uncaught Error: Missing Supabase Environment Variables` avviene perch√
 2.  **Verifica**:
     -   Vai nella tab **Actions** su GitHub.
     -   Controlla che il nuovo workflow (attivato dal push) finisca con successo.
-    -   Controlla il sito.
+3.  **PWA Icons**:
+    -   Ho generato delle icone segnaposto in `public/pwa-192x192.png` e `public/pwa-512x512.png`.
+    -   Sostituiscile con le icone reali del tuo logo quando puoi (mantieni i nomi dei file o aggiorna `vite.config.ts`).
+

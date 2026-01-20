@@ -63,8 +63,18 @@ On larger screens (>= md), the application transforms into a single-screen **Das
     -   **Full Width**: Scrollable list for Details or Configuration.
 -   **Visuals**: Clean division of space with separate zones for Input and Output.
 
-## 5. GitHub Pages Deployment
-Configured the application for deployment to GitHub Pages using GitHub Actions.
+## 6. PWA (Progressive Web App) Support
+The application is now a fully functional PWA, installable on mobile and desktop.
+
+### Features
+-   **Installable**: Manifest file allows "Add to Home Screen" triggering native-like experience.
+-   **Offline Capable**: Service Worker caches assets for offline use (auto-update configured).
+-   **Icons**: configured for various device sizes.
+
+### Technical Details
+-   **Plugin**: Used `vite-plugin-pwa`.
+-   **Configuration**: Auto-update strategy, standard manifest properties.
+-   **Assets**: Icons located in `public/` directory (replace placeholders for production).
 
 ### Configuration
 - **Base Path**: Updated `vite.config.ts` to use `/calcolapercentuali/` as the base path.
