@@ -15,7 +15,7 @@
 2.  **Enable GitHub Pages**:
     -   Go to your repository on GitHub: `https://github.com/ServiziPerTribunali/calcolapercentuali`
     -   Go to **Settings** > **Pages**.
-    -   Under **Build and deployment**, usually you need to select **Source: GitHub Actions**.
-        -   *Note: Since we are using a custom workflow that uploads an artifact, GitHub might detect this automatically, but checking the setting is safer.*
+    -   Under **Build and deployment**, **Source**, seleziona **GitHub Actions** nel menu a tendina (come vedi nello screenshot che hai mandato).
+        -   *Non usare "Deploy from a branch", perché abbiamo creato un workflow automatico apposta.*
     -   Wait for the action to complete (check the **Actions** tab).
     -   Your site should be live at: `https://ServiziPerTribunali.github.io/calcolapercentuali/`

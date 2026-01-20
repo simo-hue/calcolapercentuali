@@ -102,76 +102,101 @@ export const PatrimonioCalculator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center md:py-12 md:bg-muted/10">
+    <div className="min-h-screen bg-background flex flex-col items-center md:h-screen md:w-screen md:overflow-hidden md:bg-background">
       <div className="fixed top-4 right-4 z-50 print:hidden">
         <ModeToggle />
       </div>
 
-      <div className="w-full max-w-lg md:max-w-4xl bg-background md:bg-card md:rounded-3xl md:shadow-2xl overflow-hidden flex flex-col md:flex-row transition-all duration-500 min-h-screen md:min-h-[600px]">
+      <div className="w-full max-w-lg md:w-full md:max-w-none md:h-full bg-background md:bg-card md:shadow-none overflow-hidden flex flex-col transition-all duration-500 min-h-screen md:min-h-0 md:rounded-none">
 
-        {/* TOP SECTION: Input (Cifra in cima a tutto) */}
-        <div className="pt-16 pb-8 px-8 text-center bg-background md:bg-card relative z-10 text-foreground md:w-1/2 md:flex md:flex-col md:justify-center md:pt-8">
-          <div className="mb-2 flex items-center justify-center gap-2">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted px-2 py-1 rounded">
-              Patrimonio
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowConfig(true)}
-              className="h-6 w-6 text-muted-foreground hover:text-primary absolute right-6 top-6"
-            >
-              <Settings className="w-4 h-4" />
-            </Button>
-          </div>
+        {/* TOP ROW WRAPPER (Desktop only separation) */}
+        <div className="flex flex-col md:flex-row md:shrink-0 md:border-b border-border/50">
 
-          <div className="relative flex justify-center items-center">
-            <span className="text-4xl md:text-5xl text-muted-foreground font-light mr-2 pb-2">
-              €
-            </span>
-            <Input
-              id="patrimonio"
-              type="text"
-              inputMode="decimal"
-              pattern="[0-9]*"
-              placeholder="0"
-              value={patrimonio}
-              onChange={(e) => handlePatrimonioChange(e.target.value)}
-              className="text-6xl md:text-7xl font-bold h-24 text-center border-none shadow-none bg-transparent focus-visible:ring-0 p-0 placeholder:text-muted-foreground/10 w-full max-w-[300px] text-foreground"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleCalculate();
-              }}
-            />
-          </div>
-
-          {/* Main Action - Integrated */}
-          <div className="mt-8 flex justify-center gap-3">
-            {risultato && (
+          {/* TOP LEFT: Input (Cifra in cima a tutto) */}
+          <div className="pt-16 pb-8 px-8 text-center bg-background md:bg-card relative z-10 text-foreground md:w-1/2 md:flex md:flex-col md:justify-center md:pt-8 md:pb-8">
+            <div className="mb-2 flex items-center justify-center gap-2">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted px-2 py-1 rounded">
+                Patrimonio
+              </span>
               <Button
-                variant="outline"
-                onClick={handleReset}
-                className="h-12 px-6 rounded-full"
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowConfig(true)}
+                className="h-6 w-6 text-muted-foreground hover:text-primary absolute right-6 top-6"
               >
-                Resetta
+                <Settings className="w-4 h-4" />
               </Button>
-            )}
-            <Button
-              onClick={handleCalculate}
-              disabled={!patrimonio.trim() || isLoading}
-              className="h-12 px-12 text-lg font-semibold rounded-full shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
-            >
-              {isLoading ? <Loader2 className="animate-spin" /> : "Calcola"}
-            </Button>
+            </div>
+
+            <div className="relative flex justify-center items-center">
+              <span className="text-4xl md:text-5xl text-muted-foreground font-light mr-2 pb-2">
+                €
+              </span>
+              <Input
+                id="patrimonio"
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*"
+                placeholder="0"
+                value={patrimonio}
+                onChange={(e) => handlePatrimonioChange(e.target.value)}
+                className="text-6xl md:text-7xl font-bold h-24 text-center border-none shadow-none bg-transparent focus-visible:ring-0 p-0 placeholder:text-muted-foreground/10 w-full max-w-[300px] text-foreground"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCalculate();
+                }}
+              />
+            </div>
+
+            {/* Main Action - Integrated */}
+            <div className="mt-8 flex justify-center gap-3">
+              {risultato && (
+                <Button
+                  variant="outline"
+                  onClick={handleReset}
+                  className="h-12 px-6 rounded-full"
+                >
+                  Resetta
+                </Button>
+              )}
+              <Button
+                onClick={handleCalculate}
+                disabled={!patrimonio.trim() || isLoading}
+                className="h-12 px-12 text-lg font-semibold rounded-full shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+              >
+                {isLoading ? <Loader2 className="animate-spin" /> : "Calcola"}
+              </Button>
+            </div>
           </div>
-        </div>
+
+          {/* TOP RIGHT: Result Total (Desktop Only) */}
+          <div className="hidden md:flex md:w-1/2 md:items-center md:justify-center md:bg-muted/10 md:border-l border-border/50">
+            {risultato ? (
+              <div className="flex flex-col items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <span className="text-sm text-muted-foreground font-bold uppercase tracking-widest">
+                  Importo Dovuto
+                </span>
+                <div className="text-6xl font-black text-primary tracking-tighter">
+                  {formatCurrency(risultato.totaleCalcolato)}
+                </div>
+              </div>
+            ) : (
+              <div className="text-muted-foreground/20 font-light italic">
+                Inserisci il patrimonio per calcolare
+              </div>
+            )}
+          </div>
+
+        </div> {/* End of Top Row Wrapper */}
 
         {/* BOTTOM SECTION: Context (Results or List) */}
-        <div className="flex-1 bg-muted/30 border-t md:border-t-0 md:border-l border-border/50 p-6 md:p-8 md:w-1/2 md:flex md:flex-col md:justify-center">
+        <div className="flex-1 bg-muted/30 border-t border-border/50 p-6 md:p-8 md:overflow-y-auto">
           {/* Result Card (Animated) */}
           {risultato ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <div className="bg-background rounded-2xl p-6 border border-border/50 shadow-sm text-center">
+
+              {/* Mobile Total Display (Hidden on Desktop) */}
+              <div className="bg-background rounded-2xl p-6 border border-border/50 shadow-sm text-center md:hidden">
                 <div className="flex flex-col items-center gap-1">
                   <span className="text-xs text-muted-foreground font-bold uppercase tracking-widest">
                     Importo Dovuto

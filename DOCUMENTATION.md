@@ -53,12 +53,15 @@ Complete redesign of the mobile experience to match modern professional financia
     - Animated result entrance.
 - **Improved Configuration UI**: The Scaglioni configuration modal now uses a more compact, mobile-friendly list layout for editing tiers.
 
-### Desktop Adaptation (Split View)
-On larger screens (>= md), the application transforms into a horizontal split view:
--   **Split Layout**: The card expands horizontally (`max-w-4xl`), placing the **Input** on the left and the **Results/Context** on the right.
--   **Top-Heavy Input**: The input remains the primary focus on the left side.
--   **Context Side-by-Side**: The Results or Configuration list sits on the right, allowing for simultaneous viewing of input and output without scrolling.
--   **Visuals**: Uses backdrop blur and soft borders for a premium desktop feel.
+### Desktop Adaptation (Dashboard)
+On larger screens (>= md), the application transforms into a single-screen **Dashboard**, ensuring all critical information is visible without scrolling the page:
+-   **Full Screen**: The layout is constrained to `h-screen`, eliminating window scrollbars.
+-   **Top Row**:
+    -   **Left**: Input Section (Patrimony & Actions).
+    -   **Right**: Result Summary (Total Amount) - clearly separated.
+-   **Bottom Row**:
+    -   **Full Width**: Scrollable list for Details or Configuration.
+-   **Visuals**: Clean division of space with separate zones for Input and Output.
 
 ## 5. GitHub Pages Deployment
 Configured the application for deployment to GitHub Pages using GitHub Actions.
