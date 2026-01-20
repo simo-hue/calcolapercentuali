@@ -60,3 +60,11 @@ On larger screens (>= md), the application transforms into a "Center Stage" Dash
 -   **Integrated Actions**: Action buttons are placed directly below the input for a natural flow.
 -   **Context Below**: The Results or Configuration list sits at the bottom, providing context without distracting from the main input.
 -   **Visuals**: Uses backdrop blur and soft borders for a premium desktop feel.
+
+## 5. GitHub Pages Deployment
+Configured the application for deployment to GitHub Pages using GitHub Actions.
+
+### Configuration
+- **Base Path**: Updated `vite.config.ts` to use `/calcolapercentuali/` as the base path.
+- **Homepage**: Added `homepage` field to `package.json`.
+- **Workflow**: Created `.github/workflows/deploy.yml` to automatically build and deploy to GitHub Pages on push to `main`.

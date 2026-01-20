@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     minify: true,
   },
+  base: "/calcolapercentuali/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
