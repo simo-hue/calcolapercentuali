@@ -90,3 +90,13 @@ The application is now a fully functional PWA, installable on mobile and desktop
 - [2026-10-24]: Added two selectable progressive rate setups
 - *Details*: Added an upper segmented switch labeled “1” and “2”. Setup 1 retains the existing default rates; setup 2 applies the supplied seven bands and rates. Selecting a setup clears any previous result. Removed the settings dialog and all in-app editing of rates.
 - *Tech Notes*: Added `ALTERNATIVE_SCAGLIONI` in `src/types/patrimonio.ts`. Both setups use the existing progressive calculator. Removed the obsolete Scaglioni editor, its Supabase service, and its Supabase client dependency from the app runtime. No new dependencies or manual actions are required.
+
+## 8. GitHub Pages URL
+- [2026-10-24]: Aligned the project homepage with the simo-hue repository
+- *Details*: Updated the homepage metadata to point to the simo-hue Pages site. The older ServiziPerTribunali URL still hosts an older deployment; the current build is served from the simo-hue URL.
+- *Tech Notes*: Updated the `homepage` field in `package.json` to `https://simo-hue.github.io/calcolapercentuali/`.
+
+## 9. Mobile and installed PWA layout
+- [2026-10-24]: Improved phone layout and iOS standalone display
+- *Details*: Reworked the mobile header so the setup selector and theme control stay clear of the status bar and each other. Reduced the calculator's vertical footprint, tightened the rate list on small screens, removed automatic input focus, and allowed page scrolling when content exceeds the available height.
+- *Tech Notes*: Added `viewport-fit=cover`, safe-area padding, dynamic viewport sizing, Italian document language, Apple web app metadata, and standalone PWA manifest display with a dark theme/background color.

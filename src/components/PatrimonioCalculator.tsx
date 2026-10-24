@@ -61,12 +61,14 @@ export const PatrimonioCalculator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center md:h-screen md:w-screen md:overflow-hidden md:bg-background">
-      <div className="fixed top-4 right-4 z-50 print:hidden">
-        <ModeToggle />
-      </div>
-
-      <div className="absolute top-4 left-1/2 z-40 -translate-x-1/2 print:hidden">
+    <div
+      className="relative flex min-h-[100dvh] flex-col items-center bg-background md:h-[100dvh] md:w-screen md:overflow-hidden"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
+      <div className="relative z-50 flex w-full max-w-lg items-center justify-center px-3 py-2 print:hidden md:absolute md:left-1/2 md:top-4 md:w-auto md:max-w-none md:-translate-x-1/2 md:px-0 md:py-0">
         <ToggleGroup
           type="single"
           value={setup}
@@ -77,7 +79,7 @@ export const PatrimonioCalculator = () => {
             }
           }}
           aria-label="Seleziona configurazione"
-          className="h-12 w-[min(320px,calc(100vw-7rem))] rounded-full border border-border bg-muted p-1 shadow-sm"
+          className="h-11 w-[min(20rem,calc(100vw-6.5rem))] rounded-full border border-border bg-muted p-1 shadow-sm md:h-12"
         >
           {(['1', '2'] as const).map((value) => (
             <ToggleGroupItem
@@ -90,15 +92,18 @@ export const PatrimonioCalculator = () => {
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 md:fixed md:right-4 md:top-4 md:translate-y-0">
+          <ModeToggle />
+        </div>
       </div>
 
-      <div className="w-full max-w-lg md:w-full md:max-w-none md:h-full bg-background md:bg-card md:shadow-none overflow-hidden flex flex-col transition-all duration-500 min-h-screen md:min-h-0 md:rounded-none">
+      <div className="flex w-full max-w-lg flex-1 flex-col overflow-hidden bg-background transition-all duration-500 md:h-full md:max-w-none md:flex-none md:bg-card md:shadow-none">
 
         {/* TOP ROW WRAPPER (Desktop only separation) */}
         <div className="flex flex-col md:flex-row md:shrink-0 md:border-b border-border/50">
 
           {/* TOP LEFT: Input (Cifra in cima a tutto) */}
-          <div className="pt-16 pb-8 px-8 text-center bg-background md:bg-card relative z-10 text-foreground md:w-1/2 md:flex md:flex-col md:justify-center md:pt-8 md:pb-8">
+          <div className="relative z-10 bg-background px-6 pb-6 pt-4 text-center text-foreground md:flex md:w-1/2 md:flex-col md:justify-center md:bg-card md:px-8 md:pb-8 md:pt-8">
             <div className="mb-2 flex items-center justify-center gap-2">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted px-2 py-1 rounded">
                 Patrimonio
@@ -106,7 +111,7 @@ export const PatrimonioCalculator = () => {
             </div>
 
             <div className="relative flex justify-center items-center">
-              <span className="text-4xl md:text-5xl text-muted-foreground font-light mr-2 pb-2">
+              <span className="mr-2 pb-1 text-3xl font-light text-muted-foreground md:pb-2 md:text-5xl">
                 €
               </span>
               <Input
@@ -117,8 +122,7 @@ export const PatrimonioCalculator = () => {
                 placeholder="0"
                 value={patrimonio}
                 onChange={(e) => handlePatrimonioChange(e.target.value)}
-                className="text-6xl md:text-7xl font-bold h-24 text-center border-none shadow-none bg-transparent focus-visible:ring-0 p-0 placeholder:text-muted-foreground/10 w-full max-w-[300px] text-foreground"
-                autoFocus
+                className="h-20 w-full max-w-[260px] border-none bg-transparent p-0 text-center text-5xl font-bold text-foreground shadow-none placeholder:text-muted-foreground/10 focus-visible:ring-0 md:h-24 md:max-w-[300px] md:text-7xl"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleCalculate();
                 }}
@@ -126,7 +130,7 @@ export const PatrimonioCalculator = () => {
             </div>
 
             {/* Main Action - Integrated */}
-            <div className="mt-8 flex justify-center gap-3">
+            <div className="mt-4 flex justify-center gap-3 md:mt-8">
               {risultato && (
                 <Button
                   variant="outline"
@@ -139,7 +143,7 @@ export const PatrimonioCalculator = () => {
               <Button
                 onClick={handleCalculate}
                 disabled={!patrimonio.trim()}
-                className="h-12 px-12 text-lg font-semibold rounded-full shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+                className="h-12 min-w-44 rounded-full px-8 text-base font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02] md:px-12 md:text-lg"
               >
                 Calcola
               </Button>
@@ -167,7 +171,7 @@ export const PatrimonioCalculator = () => {
         </div> {/* End of Top Row Wrapper */}
 
         {/* BOTTOM SECTION: Context (Results or List) */}
-        <div className="flex-1 bg-muted/30 border-t border-border/50 p-6 md:p-8 md:overflow-y-auto">
+        <div className="flex-1 border-t border-border/50 bg-muted/30 p-4 pb-6 md:overflow-y-auto md:p-8">
           {/* Result Card (Animated) */}
           {risultato ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
@@ -206,15 +210,15 @@ export const PatrimonioCalculator = () => {
                 </span>
               </div>
 
-              <div className="divide-y divide-border/50 border border-border/50 bg-background/50 backdrop-blur-sm rounded-xl overflow-hidden shadow-sm">
+              <div className="divide-y divide-border/50 overflow-hidden rounded-xl border border-border/50 bg-background/50 shadow-sm backdrop-blur-sm">
                 {scaglioni.map((scaglione) => (
-                  <div key={scaglione.id} className="flex justify-between items-center p-4 hover:bg-muted/50 transition-colors">
-                    <div className="text-sm text-muted-foreground">
+                  <div key={scaglione.id} className="flex min-h-12 items-center justify-between gap-3 px-3 py-3 transition-colors hover:bg-muted/50 sm:px-4">
+                    <div className="min-w-0 text-xs text-muted-foreground sm:text-sm">
                       <span className="font-medium text-foreground">{formatCurrency(scaglione.soglia)}</span>
-                      <span className="mx-2 text-muted-foreground/50">→</span>
-                      <span>{scaglione.sogliaFine === Infinity ? '∞' : formatCurrency(scaglione.sogliaFine)}</span>
+                      <span className="mx-1.5 text-muted-foreground/50 sm:mx-2">→</span>
+                      <span className="whitespace-nowrap">{scaglione.sogliaFine === Infinity ? '∞' : formatCurrency(scaglione.sogliaFine)}</span>
                     </div>
-                    <Badge variant="secondary" className="font-bold text-sm">
+                    <Badge variant="secondary" className="shrink-0 font-bold text-xs sm:text-sm">
                       {scaglione.percentuale}%
                     </Badge>
                   </div>

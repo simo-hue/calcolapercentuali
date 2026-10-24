@@ -19,7 +19,9 @@ export default defineConfig(({ mode }) => ({
         name: 'Calcolo Patrimonio',
         short_name: 'Patrimonio',
         description: 'Calcola il tuo patrimonio in modo semplice e veloce.',
-        theme_color: '#ffffff',
+        theme_color: '#030817',
+        background_color: '#030817',
+        display: 'standalone',
         icons: [
           {
             src: 'pwa-192x192.png',
