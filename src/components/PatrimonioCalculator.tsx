@@ -1,60 +1,24 @@
 import { useState } from 'react';
-import { Settings, Info, Loader2 } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { PatrimonioCalculator as CalcolatorePatrimonio } from '@/utils/patrimonioCalculator';
-import { DEFAULT_SCAGLIONI, RisultatoCalcolo, Scaglione } from '@/types/patrimonio';
+import { ALTERNATIVE_SCAGLIONI, DEFAULT_SCAGLIONI, RisultatoCalcolo } from '@/types/patrimonio';
 import { formatCurrency } from '@/utils/patrimonioCalculator';
-import { ScaglioniConfig } from './ScaglioniConfig';
 import { RisultatoDisplay } from './RisultatoDisplay';
 import { useToast } from '@/hooks/use-toast';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { scaglioniService } from '@/services/scaglioniService';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 import { ModeToggle } from '@/components/mode-toggle';
 
 export const PatrimonioCalculator = () => {
   const [patrimonio, setPatrimonio] = useState<string>('');
   const [risultato, setRisultato] = useState<RisultatoCalcolo | null>(null);
-  const [showConfig, setShowConfig] = useState(false);
+  const [setup, setSetup] = useState<'1' | '2'>('1');
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  // Smart Caching Strategy:
-  // Fetch Scaglioni from DB.
-  // staleTime: Infinity -> The data is considered fresh forever unless explicitly invalidated.
-  // This minimizes network requests for a "furbo" fast experience.
-  const { data: scaglioni, isLoading } = useQuery({
-    queryKey: ['scaglioni'],
-    queryFn: scaglioniService.getScaglioni,
-    staleTime: Infinity,
-    gcTime: 1000 * 60 * 60 * 24, // Keep in garbage collector for 24 hours
-    initialData: DEFAULT_SCAGLIONI, // Show defaults instantly while fetching or if error
-  });
-
-  const updateScaglioniMutation = useMutation({
-    mutationFn: scaglioniService.updateScaglioni,
-    onSuccess: () => {
-      // Invalidate cache to force refresh across the app (though we optimistic updated essentially)
-      queryClient.invalidateQueries({ queryKey: ['scaglioni'] });
-      toast({
-        title: "Salvataggio riuscito",
-        description: "La configurazione degli scaglioni è stata aggiornata nel database.",
-      });
-      setRisultato(null); // Reset result
-    },
-    onError: (error) => {
-      console.error("Failed to update:", error);
-      toast({
-        title: "Errore durante il salvataggio",
-        description: "Impossibile aggiornare il database. Riprova.",
-        variant: "destructive"
-      });
-    }
-  });
-
-  const calculator = new CalcolatorePatrimonio(scaglioni || DEFAULT_SCAGLIONI);
+  const scaglioni = setup === '1' ? DEFAULT_SCAGLIONI : ALTERNATIVE_SCAGLIONI;
+  const calculator = new CalcolatorePatrimonio(scaglioni);
 
   const handleCalculate = () => {
     const patrimonioNum = parseFloat(patrimonio.replace(/[^\d.-]/g, ''));
@@ -96,15 +60,36 @@ export const PatrimonioCalculator = () => {
     setRisultato(null);
   };
 
-  const handleScaglioniUpdate = (nuoviScaglioni: Scaglione[]) => {
-    // Trigger mutation instead of local state
-    updateScaglioniMutation.mutate(nuoviScaglioni);
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col items-center md:h-screen md:w-screen md:overflow-hidden md:bg-background">
       <div className="fixed top-4 right-4 z-50 print:hidden">
         <ModeToggle />
+      </div>
+
+      <div className="absolute top-4 left-1/2 z-40 -translate-x-1/2 print:hidden">
+        <ToggleGroup
+          type="single"
+          value={setup}
+          onValueChange={(value) => {
+            if (value === '1' || value === '2') {
+              setSetup(value);
+              setRisultato(null);
+            }
+          }}
+          aria-label="Seleziona configurazione"
+          className="h-12 w-[min(320px,calc(100vw-7rem))] rounded-full border border-border bg-muted p-1 shadow-sm"
+        >
+          {(['1', '2'] as const).map((value) => (
+            <ToggleGroupItem
+              key={value}
+              value={value}
+              aria-label={`Configurazione ${value}`}
+              className="h-full flex-1 rounded-full border-0 text-base font-medium text-muted-foreground shadow-none transition-colors data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm"
+            >
+              {value}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
       </div>
 
       <div className="w-full max-w-lg md:w-full md:max-w-none md:h-full bg-background md:bg-card md:shadow-none overflow-hidden flex flex-col transition-all duration-500 min-h-screen md:min-h-0 md:rounded-none">
@@ -118,14 +103,6 @@ export const PatrimonioCalculator = () => {
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted px-2 py-1 rounded">
                 Patrimonio
               </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowConfig(true)}
-                className="h-6 w-6 text-muted-foreground hover:text-primary absolute right-6 top-6"
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
             </div>
 
             <div className="relative flex justify-center items-center">
@@ -161,10 +138,10 @@ export const PatrimonioCalculator = () => {
               )}
               <Button
                 onClick={handleCalculate}
-                disabled={!patrimonio.trim() || isLoading}
+                disabled={!patrimonio.trim()}
                 className="h-12 px-12 text-lg font-semibold rounded-full shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
               >
-                {isLoading ? <Loader2 className="animate-spin" /> : "Calcola"}
+                Calcola
               </Button>
             </div>
           </div>
@@ -216,7 +193,7 @@ export const PatrimonioCalculator = () => {
                 </div>
                 <RisultatoDisplay
                   risultato={risultato}
-                  scaglioni={scaglioni || DEFAULT_SCAGLIONI}
+                  scaglioni={scaglioni}
                 />
               </div>
             </div>
@@ -227,11 +204,10 @@ export const PatrimonioCalculator = () => {
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                   Configurazione Attuale
                 </span>
-                {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
               </div>
 
               <div className="divide-y divide-border/50 border border-border/50 bg-background/50 backdrop-blur-sm rounded-xl overflow-hidden shadow-sm">
-                {(scaglioni || DEFAULT_SCAGLIONI).map((scaglione) => (
+                {scaglioni.map((scaglione) => (
                   <div key={scaglione.id} className="flex justify-between items-center p-4 hover:bg-muted/50 transition-colors">
                     <div className="text-sm text-muted-foreground">
                       <span className="font-medium text-foreground">{formatCurrency(scaglione.soglia)}</span>
@@ -244,24 +220,9 @@ export const PatrimonioCalculator = () => {
                   </div>
                 ))}
               </div>
-
-              <div className="text-center pt-4">
-                <p className="text-xs text-muted-foreground">
-                  Modifica gli scaglioni cliccando l'icona <Settings className="w-3 h-3 inline align-baseline" /> in alto a destra.
-                </p>
-              </div>
             </div>
           )}
         </div>
-
-        {/* Modal Configurazione */}
-        {showConfig && (
-          <ScaglioniConfig
-            scaglioni={scaglioni || DEFAULT_SCAGLIONI}
-            onSave={handleScaglioniUpdate}
-            onClose={() => setShowConfig(false)}
-          />
-        )}
       </div>
     </div>
   );

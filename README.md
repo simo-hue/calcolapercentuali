@@ -171,7 +171,7 @@ interface RisultatoCalcolo {
 
 ### Componenti Principali
 - **PatrimonioCalculator**: Componente principale con logica di calcolo
-- **ScaglioniConfig**: Dialog per configurazione scaglioni
+- **Setup switch**: Selettore tra le due configurazioni progressive fisse
 - **RisultatoDisplay**: Visualizzazione dettagliata dei risultati
 
 ### Utilities
